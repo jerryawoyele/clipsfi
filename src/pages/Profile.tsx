@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Video, Trophy, Target, Settings, Share, Copy, Heart, MessageCircle, Calendar, Coins } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SettingsModal from "@/components/SettingsModal";
 
 const mockUserData = {
   name: "CreativeMaker",
@@ -169,9 +170,7 @@ const Profile = () => {
             <Button variant="ghost" size="icon" onClick={copyProfile}>
               <Share className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon">
-              <Settings className="w-5 h-5" />
-            </Button>
+            <SettingsModal />
           </div>
         </div>
       </motion.header>

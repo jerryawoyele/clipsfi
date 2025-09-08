@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import VideoCard from "@/components/VideoCard";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import SettingsModal from "@/components/SettingsModal";
 
 // Mock data for clips
 const mockClips = [
@@ -65,6 +64,7 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const { toast } = useToast();
+  const mobileContainerRef = useRef<HTMLDivElement>(null);
 
   const handleLike = (clipId: string) => {
     setClips((prev) =>
@@ -112,7 +112,7 @@ const Home = () => {
 
   // Infinite scroll effect
   useEffect(() => {
-    const handleScroll = () => {
+    const handleDesktopScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
         document.documentElement.offsetHeight - 1000
@@ -121,8 +121,33 @@ const Home = () => {
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleMobileScroll = () => {
+      const container = mobileContainerRef.current;
+      if (container) {
+        if (
+          container.scrollTop + container.clientHeight >=
+          container.scrollHeight - 1000
+        ) {
+          loadMoreClips();
+        }
+      }
+    };
+
+    // Desktop scroll listener
+    window.addEventListener("scroll", handleDesktopScroll);
+    
+    // Mobile scroll listener
+    const mobileContainer = mobileContainerRef.current;
+    if (mobileContainer) {
+      mobileContainer.addEventListener("scroll", handleMobileScroll);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleDesktopScroll);
+      if (mobileContainer) {
+        mobileContainer.removeEventListener("scroll", handleMobileScroll);
+      }
+    };
   }, [isLoading, page]);
 
   return (
@@ -153,7 +178,6 @@ const Home = () => {
             >
               <RefreshCw className="w-5 h-5" />
             </Button>
-            <SettingsModal />
           </div>
         </div>
       </motion.header>
@@ -161,6 +185,7 @@ const Home = () => {
       {/* Mobile Feed - Snap Scroll */}
       <div className="block md:hidden pt-20 pb-24">
         <div 
+          ref={mobileContainerRef}
           className="h-[calc(100vh-5rem-6rem)] overflow-y-auto snap-y snap-mandatory"
           style={{ scrollSnapType: 'y mandatory' }}
         >
